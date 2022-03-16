@@ -1,15 +1,18 @@
 const router = require('express').Router();
-const passport = require('passport');
 const userController = require('../../controllers/user.controller');
 const validator = require('../../validators/user');
+const { authenticate } = require('../auth');
+const multer = require('../multer');
 
-router.get('/', passport.authenticate('jwt', {session: false}), validator.query, userController.query);
-router.post('/', validator.register, userController.register);
+router.get('/', authenticate, validator.query, userController.query);
+router.post('/', validator.register, multer.single('file'), userController.register);
 
-router.patch('/me', passport.authenticate('jwt', {session: false}), userController.update);
-router.get('/me', passport.authenticate('jwt', {session: false}), userController.getById);
+router.patch('/me', authenticate, multer.single('file'), userController.update);
+router.get('/me', authenticate, userController.getById);
 
-router.get('/auth', passport.authenticate('jwt', {session: false}), userController.auth);
+router.put('/password', authenticate, userController.changePassword);
+
+router.get('/auth', authenticate, userController.auth);
 router.post('/login', validator.login, userController.login);
 router.get('/logout', userController.logout);
 

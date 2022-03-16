@@ -9,7 +9,12 @@ const {
 
 const service = {
   async query({ keyword, skip = 0, limit = 10 }) {
-    const filter = _.isNil(keyword) ? null : { name: new RegExp(`^${keyword}`) };
+    const filter = {
+      isActived: true,
+    }
+    if(!_.isNil(keyword)) {
+      filter.name = new RegExp(`^${keyword}`);
+    }
     const users = await User.find(filter)
       .sort({ name: 1 })
       .skip(skip)
@@ -20,15 +25,15 @@ const service = {
 
   async getById(id) {
     const user = await User.findById(id).lean();
-    if (!user) {
+    if (!user && !user.isActived) {
       throw ErrorBadRequest("user is not exists.");
     }
     return user;
   },
 
-  async update({ id, name, email, phone }) {
+  async update({ id, name, email, phone, imagePath }) {
     const user = await User.findById(id).lean();
-    if (!user) {
+    if (!user && !user.isActived) {
       throw ErrorBadRequest("user is not exists.");
     }
     const updateData = _.omitBy(
@@ -36,6 +41,7 @@ const service = {
         name,
         email,
         phone,
+        imagePath,
       },
       _.isUndefined
     );
@@ -49,9 +55,33 @@ const service = {
     return userUpdated;
   },
 
+  async changePassword({ id, password, oldPassword }) {
+    const user = await User.findById(id).lean();
+    if (!user && !user.isActived) {
+      throw ErrorBadRequest("user is not exists.");
+    }
+
+    const match = await bcrypt.compare(oldPassword, user.password);
+    if (!match) {
+      throw ErrorUnauthorized("old password is invalid.");
+    }
+
+    const passwordHashed = await bcrypt.hash(password, 10);
+    const userUpdated = await User.findByIdAndUpdate(
+      id,
+      {
+        password: passwordHashed
+      },
+      {
+        new: true,
+      }
+    );
+    return userUpdated;
+  },
+
   async login({ username, password }) {
     const user = await User.findOne({ username }).lean();
-    if (!user) {
+    if (!user || !user.isActived) {
       throw ErrorUnauthorized("username or password is invalid.");
     }
     const match = await bcrypt.compare(password, user.password);
@@ -61,7 +91,7 @@ const service = {
     return user;
   },
 
-  async register({ username, password, name, email, phone }) {
+  async register({ username, password, name, email, phone, imagePath }) {
     const user = await User.findOne({ username }).lean();
     if (user) {
       throw ErrorBadRequest("username is exists.");
@@ -74,6 +104,7 @@ const service = {
       name,
       email,
       phone,
+      imagePath,
     });
     return newUser;
   },

@@ -13,10 +13,10 @@ const restaurantIdIsExists = async (value) => {
 
 module.exports = {
   query: [
-    check("restaurantId")
-      .optional()
-      .custom(restaurantIdIsExists)
-      .withMessage("is not exists"),
+    // check("restaurantId")
+    //   .optional()
+    //   .custom(restaurantIdIsExists)
+    //   .withMessage("is not exists"),
     check("keyword")
       .optional()
       .isString()

@@ -1,26 +1,33 @@
 const _ = require("lodash");
-const queueRestaurantSerializer = require('./queueRestaurant');
 
 module.exports = {
-  serialize(restaurants = []) {
+  serializeQueueGroups(queueGroups = []) {
+    const queueGroupSerialized = queueGroups.map((q) => {
+      return {
+        id: q._id.toString(),
+        ..._.pick(q, ["name", "discription", "queueSequence", "currentSequence", "prefix", "digit", "minSeat", "isActived"]),
+      };
+    });
+    return queueGroupSerialized;
+  },
+
+  serializeRestaurants(restaurants = []) {
     const restaurantSerialized = restaurants.map((restaurant) => {
+      const queueGroups = this.serializeQueueGroups(restaurant.queueGroups);
       return {
         id: restaurant._id.toString(),
         userId: restaurant.userId.toString(),
         ..._.pick(restaurant, ["name", "phone", "coordinates", "isActived"]),
+        queueGroups,
       };
     });
-    return {
-      restaurants: restaurantSerialized,
-    };
+    return restaurantSerialized
   },
 
-  serializeWithQueue(restaurants = [], queueRestaurants = []) {
-    const restaurantSerialized = this.serialize(restaurants);
-    const queueRestaurantSerialized = queueRestaurantSerializer.serialize(queueRestaurants);
+  serialize(restaurants = [], queues = []) {
+    const restaurantSerialized = this.serializeRestaurants(restaurants);
     return {
-      ...restaurantSerialized,
-      ...queueRestaurantSerialized,
+      restaurants: restaurantSerialized,
     };
   },
 };

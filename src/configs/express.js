@@ -25,6 +25,7 @@ module.exports = async (app) => {
   app.use(cors(corsOptions));
 
   // Parser Body
+  app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(cookieParser());
 

@@ -8,6 +8,7 @@ const schema = new mongoose.Schema(
     email: { type: String, required: true },
     phone: { type: String, required: true },
     isActived: { type: String, default: false },
+    imagePath: { type: String}
   },
   { timestamps: true }
 );

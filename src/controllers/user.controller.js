@@ -1,6 +1,7 @@
 const passport = require("passport");
 const jwt = require('jsonwebtoken');
 const userService = require("../services/user.service");
+const fileService = require("../services/file.service");
 const { secret } = require('../configs/app');
 const userSerializer = require('../serializers/user');
 
@@ -31,7 +32,23 @@ const controller = {
     try {
       req.validate();
       const id = req.user._id.toString();
-      const user = await userService.update({...req.body, id});
+      let imagePath;
+      if(req.file){
+        imagePath = await fileService.upload(req.file);
+      }
+      const user = await userService.update({...req.body, id, imagePath});
+      const userSerialized = userSerializer.serialize([user]);
+      res.success(userSerialized);
+    } catch (error) {
+      res.error(error);
+    }
+  },
+
+  async changePassword(req, res) {
+    try {
+      req.validate();
+      const id = req.user._id.toString();
+      const user = await userService.changePassword({...req.body, id});
       const userSerialized = userSerializer.serialize([user]);
       res.success(userSerialized);
     } catch (error) {
@@ -56,7 +73,7 @@ const controller = {
     }
   },
 
-  logout(req, res, next) {
+  logout(req, res) {
     res.cookie('token', null, { maxAge: 1, httpOnly: true });
     res.success({users: null});
   },
@@ -69,7 +86,11 @@ const controller = {
   async register(req, res) {
     try {
       req.validate();
-      const user = await userService.register(req.body);
+      let imagePath;
+      if(req.file){
+        imagePath = await fileService.upload(req.file);
+      }
+      const user = await userService.register({...req.body, imagePath});
       const userSerialized = userSerializer.serialize([user]);
       res.success(userSerialized);
     } catch (error) {

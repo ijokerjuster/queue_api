@@ -13,7 +13,7 @@ const schema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     restaurantId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    queueRestaurantId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    queueGroupId: { type: mongoose.Schema.Types.ObjectId, required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, required: true },
     fullname: { type: String, required: true },
     phone: { type: String, required: true },
@@ -30,7 +30,7 @@ const schema = new mongoose.Schema(
 );
 
 schema.index(
-  { restaurantId: 1, queueRestaurantId: 1, sequence: 1 },
+  { restaurantId: 1, queueGroupId: 1, sequence: 1 },
   { unique: true }
 );
 

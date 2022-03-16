@@ -5,7 +5,7 @@ module.exports = {
         const userSerialized = users.map(user => {
             return {
                 id: user._id.toString(),
-                ..._.pick(user, ['username', 'name', 'email', 'phone']),
+                ..._.pick(user, ['username', 'name', 'email', 'phone', 'imagePath']),
             }
         })
         return {
